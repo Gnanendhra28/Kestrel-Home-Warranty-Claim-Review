@@ -1,0 +1,8 @@
+model_name,accuracy,precision,recall,f1_score,roc_auc,pr_auc,true_positives,false_positives,true_negatives,false_negatives,false_positive_rate,may_top40_frauds,may_top40_net_inr,june_top40_frauds,june_top40_net_inr,total_top40_frauds,total_top40_inr_captured,total_top40_net_inr,value_per_reviewed_claim
+Naive All-Zero Baseline,0.9747,0.0,0.0,0.0,0.5,0.0253,0,0,1386,36,0.0,1,-13361.0,1,-13794.0,2,3245.0,-27155.0,-339.44
+"Logistic Regression (C=0.1, Balanced)",0.8312,0.0565,0.3611,0.0977,0.622,0.0434,13,217,1169,23,0.1566,0,-15200,5,-8604.0,5,6596.0,-23804.0,-297.55
+"Random Forest (depth=6, Balanced)",0.962,0.1538,0.1111,0.129,0.7059,0.0722,4,22,1364,32,0.0159,3,-9379.0,4,-7890.0,7,13131.0,-17269.0,-215.86
+"Random Forest (depth=8, Balanced)",0.9691,0.1,0.0278,0.0435,0.6619,0.0557,1,9,1377,35,0.0065,3,-9379.0,3,-9232.0,6,11789.0,-18611.0,-232.64
+HistGradientBoosting (Balanced),0.962,0.1538,0.1111,0.129,0.4003,0.0516,4,22,1364,32,0.0159,2,-11218.0,2,-11227.0,4,7955.0,-22445.0,-280.56
+"LightGBM (depth=4, Balanced)",0.9634,0.1667,0.1111,0.1333,0.4412,0.066,4,20,1366,32,0.0144,3,-10234.0,3,-10228.0,6,9938.0,-20462.0,-255.78
+"Random Forest (depth=6, No Text)",0.9641,0.1429,0.0833,0.1053,0.7245,0.0758,3,18,1368,33,0.013,4,-7384.0,3,-9232.0,7,13784.0,-16616.0,-207.7

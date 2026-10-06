@@ -1,0 +1,4 @@
+month,total_claims,total_fraud,frauds_caught,genuine_flagged,precision_at_40,fraud_recall_at_40,fraud_inr_captured,mean_claim_amount,review_cost,net_value,value_per_reviewed_claim
+May 2026,709,14,3,37,0.075,0.2143,5821.0,5393.25,15200,-9379.0,-234.47
+June 2026,713,22,4,36,0.1,0.1818,7310.0,4163.1,15200,-7890.0,-197.25
+Aggregate (May + June),1422,36,7,73,0.0875,0.1944,13131.0,4778.18,30400,-17269.0,-215.86

@@ -1,0 +1,43 @@
+feature_name,data_source,formula,meaning,availability_timestamp,leakage_risk,allowed_in_production
+claim_amount_inr,train.csv / test_unlabelled.csv,claim_amount_inr,Declared warranty repair claim amount in Indian Rupees,At claim submission,None (primary production input),Yes
+log_claim_amount,Derived from claim_amount_inr,log1p(claim_amount_inr),Natural logarithm of claim amount for variance stabilization,At claim submission,None,Yes
+is_sub_2000,Derived from claim_amount_inr,1 if claim_amount_inr < 2000.0 else 0,"Indicator whether claim falls below May 1, 2026 auto-approval threshold",At claim submission,None,Yes
+claim_amount_threshold_gap,Derived from claim_amount_inr,"max(0.0, 2000.0 - claim_amount_inr) if is_sub_2000 else 0.0","Distance below ₹2,000 threshold (sensitive to threshold clustering)",At claim submission,None,Yes
+photo_attached,train.csv / test_unlabelled.csv,1 if photo_attached == 'Y' else 0,Binary flag indicating whether diagnostic photograph was submitted,At claim submission,None,Yes
+customer_prior_claims,train.csv / test_unlabelled.csv,customer_prior_claims,Historical claim count for customer in Kestrel CRM,At claim submission,None,Yes
+sku,train.csv / test_unlabelled.csv,sku,Product Stock Keeping Unit identifier (21 distinct values),At claim submission,None,Yes
+product_family,products.csv,"lookup(sku, products.family)","Appliance family (7 categories: Air Fryer, Water Purifier, etc.)",At claim submission,None,Yes
+product_list_price,products.csv,"lookup(sku, products.list_price_inr)",Catalog retail price of the appliance in Indian Rupees,At claim submission,None,Yes
+product_warranty_months,products.csv,"lookup(sku, products.warranty_months)",Official manufacturer warranty duration (12 or 24 months),At claim submission,None,Yes
+claim_amount_to_list_price_ratio,Derived from claim and products.csv,claim_amount_inr / product_list_price,Claim cost relative to appliance replacement cost,At claim submission,None,Yes
+days_since_purchase,train.csv / test_unlabelled.csv,days_since_purchase,Days elapsed between customer invoice date and claim,At claim submission,None,Yes
+days_to_warranty_ratio,Derived from claim and products.csv,days_since_purchase / (product_warranty_months * 30.5),Fraction of warranty period expired at time of failure,At claim submission,None,Yes
+is_near_warranty_expiry,Derived from days_to_warranty_ratio,1 if days_to_warranty_ratio >= 0.85 else 0,Claim filed in final 15% of warranty window,At claim submission,None,Yes
+is_early_life_claim,Derived from days_since_purchase,1 if days_since_purchase <= 30 else 0,Infant mortality claim filed within 30 days of purchase,At claim submission,None,Yes
+partner_type,partners.csv,"lookup(partner_id, partners.partner_type)","Partner category: authorised_service_centre, franchise, freelance_technician",At claim submission,None,Yes
+partner_city,partners.csv,"lookup(partner_id, partners.city)",Operating city of the partner (18 cities across India),At claim submission,None,Yes
+partner_age_days_at_claim,Derived from claim and partners.csv,(submitted_at.date - onboarded_date).days,Partner operational tenure in days on the day claim is filed,At claim submission,None,Yes
+is_new_partner_180d,Derived from partner_age_days_at_claim,1 if partner_age_days_at_claim <= 180 else 0,Flag indicating partner onboarded within past 6 months,At claim submission,None,Yes
+is_new_partner_365d,Derived from partner_age_days_at_claim,1 if partner_age_days_at_claim <= 365 else 0,Flag indicating partner onboarded within past 1 year,At claim submission,None,Yes
+partner_claims_prev_7d,Temporal claim intake index,"count(claims by partner in [T - 7d, T))",Short-term burst volume: partner claims submitted in preceding 7 days,At claim submission,"None (strictly prior claims, current excluded)",Yes
+partner_claims_prev_30d,Temporal claim intake index,"count(claims by partner in [T - 30d, T))",Medium-term volume: partner claims submitted in preceding 30 days,At claim submission,"None (strictly prior claims, current excluded)",Yes
+partner_claims_lifetime_prior,Temporal claim intake index,count(claims by partner strictly before T),Cumulative historical experience of partner prior to current claim,At claim submission,"None (strictly prior claims, current excluded)",Yes
+partner_claim_velocity_ratio,Derived from 7d and 30d counts,claims_7d / (claims_30d / 4.0 + 1.0),Ratio of recent 7-day intake rate to expected 30-day weekly baseline,At claim submission,None (strictly prior claims),Yes
+partner_sub2000_claims_prev_30d,Temporal claim intake index,"count(claims < 2000 by partner in [T - 30d, T))",Small claim volume submitted by partner in preceding 30 days,At claim submission,None (strictly prior claims),Yes
+partner_sub2000_ratio_prev_30d,Derived from sub2000 and total 30d counts,"sub2k_claims_30d / max(claims_30d, 1)",Share of recent partner claims exploiting auto-approval threshold,At claim submission,None (strictly prior claims),Yes
+partner_prior_fraud_count,Historical resolved investigation log,count(claims by partner before T with is_fraud == 1),Historical confirmed fraud occurrences for this partner strictly before T,At claim submission,None (strictly prior resolved training outcomes),Yes
+partner_prior_resolved_claims,Historical resolved investigation log,"count(claims by partner before T with is_fraud in (0, 1))",Historical audit sample size for this partner strictly before T,At claim submission,None (strictly prior resolved training outcomes),Yes
+partner_smoothed_fraud_rate,Derived via Empirical Bayes shrinkage,(prior_fraud + 20 * 0.01265) / (prior_resolved + 20),Bayesian-smoothed partner fraud rate with shrinkage towards global mean,At claim submission,None (strictly prior resolved training outcomes),Yes
+serial_prior_claim_count,Temporal serial intake index,count(claims with same product_serial strictly before T),Frequency of repeat claims filed under the same serial number,At claim submission,None (strictly prior claims),Yes
+claim_month,Derived from submitted_at,submitted_at.month,Calendar month of claim submission (1 to 12),At claim submission,None,Yes
+claim_day_of_week,Derived from submitted_at,submitted_at.weekday,"Day of week of claim submission (0=Monday, 6=Sunday)",At claim submission,None,Yes
+claim_hour,Derived from submitted_at,submitted_at.hour,Hour of day when claim was lodged in Indian Standard Time (0 to 23),At claim submission,None,Yes
+is_weekend,Derived from claim_day_of_week,"1 if claim_day_of_week in (5, 6) else 0",Flag indicating weekend submission,At claim submission,None,Yes
+post_policy_change,Derived from submitted_at,1 if submitted_at >= '2026-05-01' else 0,"Flag indicating claim was submitted under the post-May 1, 2026 policy",At claim submission,None,Yes
+clean_fault_description,Derived from claim_description,clean_fault_description(claim_description),Standardized canonical appliance failure category (12 categories),At claim submission,"None (sanitized, prompt injections stripped)",Yes
+inspector_note,train.csv / test_unlabelled.csv,inspector_note (raw text),Technician/inspector manual field notes entered after inspection,After inspection sign-off,SEVERE (81.2% missing in test due to auto-approval rule),NO (Rejected)
+partner_inspected,train.csv / test_unlabelled.csv,partner_inspected (raw 'Y'/'N'),Inspection sign-off flag,After inspection sign-off,SEVERE (Distribution shift: 83.7% in train -> 21.3% in test),NO (Rejected)
+source,train.csv,source ('crm' vs 'legacy_zoho'),IT database migration origin flag,Data migration artifact,"HIGH (100% CRM in test, 0% legacy_zoho; spurious artifact)",NO (Rejected)
+is_fraud,train.csv,is_fraud,Confirmed ground truth fraud status,Only after forensic fraud investigation,DIRECT TARGET LEAKAGE (Supervised target label only),NO (Target)
+lifetime_partner_fraud_rate,Calculated across entire training set,sum(fraud) / count(claims),Partner lifetime fraud rate using future data,At end of study,SEVERE TEMPORAL LEAKAGE (Leaks future outcomes into past),NO (Rejected)
+duplicate_resubmission_records,train.csv,Second submission of same claim_id,Resubmitted duplicate claims,3 days post initial submission,Artificial weight distortion and train/val cross-contamination,NO (Excluded from canonical train)

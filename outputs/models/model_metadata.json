@@ -1,0 +1,25 @@
+{
+  "model_type": "RandomForestClassifier",
+  "hyperparameters": {
+    "n_estimators": 150,
+    "max_depth": 6,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "training_samples": 9724,
+  "validation_samples": 1422,
+  "training_period": "2025-04-01 to 2026-04-30",
+  "validation_period": "2026-05-01 to 2026-06-30",
+  "validation_metrics": {
+    "accuracy": 0.962,
+    "precision": 0.1538,
+    "recall": 0.1111,
+    "f1_score": 0.129,
+    "roc_auc": 0.7059,
+    "pr_auc": 0.0722,
+    "top40_frauds_caught": 7,
+    "top40_net_inr": -17269.0
+  },
+  "python_version": "3.13.14",
+  "scikit_learn_version": "1.9.1"
+}
