@@ -174,7 +174,7 @@ All models were evaluated using an **out-of-time temporal split** reflecting the
 - **Validation Period:** 2026-05-01 through 2026-06-30 (1,422 post-policy claims)
 - **Test Period:** 2026-07-01 through 2026-09-30 (2,252 unlabelled claims scored in `outputs/predictions.csv`)
 
-### Temporal Validation Performance:
+### Validation Performance:
 
 | Metric                      | Selected Random Forest | Naive Baseline | Operational Interpretation                 |
 | :-------------------------- | :--------------------: | :------------: | :----------------------------------------- |
